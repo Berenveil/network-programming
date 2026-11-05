@@ -27,14 +27,14 @@ void RecieveLoop(SOCKET connectSocket) {
 int main() {
 	SetConsoleOutputCP(CP_UTF8);
 	SetConsoleCP(CP_UTF8);
-	WSADATA wsaData;
-	int result = WSAStartup(MAKEWORD(2, 2), &wsaData);
+	WSADATA wsaData; //библиотека
+	int result = WSAStartup(MAKEWORD(2, 2), &wsaData); //версия
 	if (result != 0) {
 		std::cout << "Winsock Failed: " << result << std::endl;
 		return 1;
 	}
 
-	SOCKET listenSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+	SOCKET listenSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP); //первый пустой сокет
 	if (listenSocket == INVALID_SOCKET) {
 		std::cout << "create socket failed: " << WSAGetLastError() << std::endl;
 		return 1;
@@ -42,7 +42,7 @@ int main() {
 
 	sockaddr_in clienInfo;
 	clienInfo.sin_family = AF_INET;
-	clienInfo.sin_port = htons(PORT);
+	clienInfo.sin_port = htons(PORT); //порт от переменной
 	inet_pton(AF_INET, "", &clienInfo.sin_addr);
 
 	result = connect(listenSocket, (sockaddr*)&clienInfo, sizeof(clienInfo));
@@ -52,9 +52,15 @@ int main() {
 		std::cout << "Введите имя: ";
 		std::getline(std::cin, username);
 	} while (username.empty());
-	int usernameSend = send(listenSocket, username.c_str(), username.size(), 0);
+	std::string password;
+	do {
+		std::cout << "Введите пароль: ";
+		std::getline(std::cin, password);
+	} while (password.empty());
+	std::string userInfo = username + ":" + password;
+	int userInfoSend = send(listenSocket, username.c_str(), username.size(), 0);
 
-	if (usernameSend == SOCKET_ERROR) {
+	if (userInfoSend == SOCKET_ERROR) {
 		std::cerr << "send failed: " << WSAGetLastError() << std::endl;
 	}
 
