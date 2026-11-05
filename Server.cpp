@@ -6,22 +6,28 @@
 #include <thread>
 #include <mutex>
 #include <list>
+#include <sqlite3.h>
 
 #pragma comment(lib, "ws2_32.lib")
 
-#define PORT 8081
+#define PORT 8080
 
 std::mutex coutMutex;
 std::list<SOCKET> clients;
 
 void HandleThread(SOCKET clientSocket) {
     std::string username;
+    std::string password;
+    std::string userInfo;
     char buffer[4096];
     int bytesReceived = 0;
 
     bytesReceived = recv(clientSocket, buffer, sizeof(buffer), 0);
     buffer[bytesReceived] = '\0';
-    username = buffer;
+    userInfo = buffer;
+    int pos = userInfo.find(":");
+    username = userInfo.substr(0, pos);
+    password = userInfo.substr(pos + 1);
     if (bytesReceived > 0) {
         std::lock_guard<std::mutex> lock(coutMutex);
         std::cout << "Клиент: " << username << " подключился" << std::endl;
@@ -33,6 +39,7 @@ void HandleThread(SOCKET clientSocket) {
             buffer[bytesReceived] = '\0';
             std::lock_guard<std::mutex> lock(coutMutex);
             std::cout << "[" << username << "]: " << buffer << std::endl;
+            // Отправка ответа
             std::string response = "Получен ответ от сервера: ";
             response += buffer;
             for (auto client : clients) {
@@ -64,12 +71,14 @@ int main() {
     SetConsoleOutputCP(CP_UTF8);
     SetConsoleCP(CP_UTF8);
 
+    // Инициализация Winsock
     WSADATA wsaData;
     if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) {
         std::cerr << "WSAStartup failed\n";
         return 1;
     }
 
+    // Создание сокета
     SOCKET serverSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     if (serverSocket == INVALID_SOCKET) {
         std::cerr << "Socket creation failed\n";
@@ -77,11 +86,13 @@ int main() {
         return 1;
     }
 
+    // Настройка адреса
     sockaddr_in serverAddr{};
     serverAddr.sin_family = AF_INET;
-    serverAddr.sin_addr.s_addr = INADDR_ANY;
+    serverAddr.sin_addr.s_addr = INADDR_ANY;  // Слушаем на всех интерфейсах
     serverAddr.sin_port = htons(PORT);
 
+    // Привязка сокета
     if (bind(serverSocket, (sockaddr*)&serverAddr, sizeof(serverAddr)) == SOCKET_ERROR) {
         std::cerr << "Bind failed\n";
         closesocket(serverSocket);
@@ -89,6 +100,7 @@ int main() {
         return 1;
     }
 
+    // Прослушивание
     if (listen(serverSocket, SOMAXCONN) == SOCKET_ERROR) {
         std::cerr << "Listen failed\n";
         closesocket(serverSocket);
