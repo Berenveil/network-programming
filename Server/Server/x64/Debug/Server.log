@@ -1,0 +1,5 @@
+﻿  Server.cpp
+C:\Users\Student\Pictures\Server\Server.cpp(28,13): warning C4267: инициализация: преобразование из "size_t" в "int"; возможна потеря данных
+C:\Users\Student\Pictures\Server\Server.cpp(49,68): warning C4267: аргумент: преобразование из "size_t" в "int"; возможна потеря данных
+  sqlite3.c
+  Server.vcxproj -> C:\Users\Student\Pictures\Server\x64\Debug\Server.exe
