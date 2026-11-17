@@ -60,6 +60,14 @@ int main() {
 	std::string userInfo = username + ":" + password;
 	int userInfoSend = send(listenSocket, username.c_str(), username.size(), 0);
 
+	char responceBuffer[4096];
+	int bytesRecieved;
+	
+	bytesRecieved = recv(listenSocket, responceBuffer, sizeof(responceBuffer), 0);
+
+	responceBuffer[bytesRecieved] = "\0";
+	std::cout << responceBuffer << std::endl;
+
 	if (userInfoSend == SOCKET_ERROR) {
 		std::cerr << "send failed: " << WSAGetLastError() << std::endl;
 	}
