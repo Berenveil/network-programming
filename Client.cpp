@@ -62,10 +62,10 @@ int main() {
 
 	char responceBuffer[4096];
 	int bytesRecieved;
-	
+
 	bytesRecieved = recv(listenSocket, responceBuffer, sizeof(responceBuffer), 0);
 
-	responceBuffer[bytesRecieved] = "\0";
+	responceBuffer[bytesRecieved] = '\0';
 	std::cout << responceBuffer << std::endl;
 
 	if (userInfoSend == SOCKET_ERROR) {
